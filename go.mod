@@ -1,4 +1,4 @@
-module go-mongo-client
+module github.com/billyct/go-mongo-client
 
 go 1.12
 

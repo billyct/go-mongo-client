@@ -27,19 +27,15 @@ func NewClient(uri string, database string, collection string) (*Client, error) 
 	return c, nil
 }
 
-func (c *Client) Update(filter interface{}, update interface{}) error {
-	_, err := c.Collection.UpdateOne(c.Ctx, filter, update)
+func (c *Client) Update(filter interface{}, update interface{}, opts ...*options.UpdateOptions) error {
+	_, err := c.Collection.UpdateOne(c.Ctx, filter, update, opts...)
 	return err
 }
 
-func (c *Client) Walk(cb func(*mongo.Cursor) error) error {
-
-	findOptions := options.Find()
-	findOptions.SetNoCursorTimeout(true)
-
+func (c *Client) Walk(cb func(*mongo.Cursor) error, opts ...*options.FindOptions) error {
 	filter := bson.D{{}}
 
-	cur, err := c.Collection.Find(c.Ctx, filter, findOptions)
+	cur, err := c.Collection.Find(c.Ctx, filter, opts...)
 	if err != nil {
 		return err
 	}

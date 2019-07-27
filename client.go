@@ -27,7 +27,7 @@ func NewClient(uri string, database string, collection string) (*Client, error) 
 	return c, nil
 }
 
-func (c *Client) Update(filter interface{}, update interface{}, opts ...*options.UpdateOptions) error {
+func (c *Client) UpdateOne(filter interface{}, update interface{}, opts ...*options.UpdateOptions) error {
 	_, err := c.Collection.UpdateOne(c.Ctx, filter, update, opts...)
 	return err
 }

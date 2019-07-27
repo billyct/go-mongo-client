@@ -57,4 +57,6 @@ func (c *Client) Walk(cb func(*mongo.Cursor) error) error {
 	if err != nil {
 		return err
 	}
+
+	return nil
 }

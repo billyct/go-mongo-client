@@ -8,40 +8,53 @@ import (
 )
 
 type Client struct {
-	Uri        string
-	Database   string
-	Collection string
+	Collection *mongo.Collection
+	Client *mongo.Client
+	Ctx context.Context
 }
 
-func (c *Client) Walk(cb func(*mongo.Cursor) error) {
-	ctx := context.TODO()
+func NewClient(uri string, database string, collection string) (*Client, error) {
+	c := new(Client)
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(c.Uri))
-	checkError(err)
+	c.Ctx = context.TODO()
+	client, err := mongo.Connect(c.Ctx, options.Client().ApplyURI(uri))
+	if err != nil {
+		return nil, err
+	}
+	c.Client = client
+	c.Collection = client.Database(database).Collection(collection)
 
-	collection := client.Database(c.Database).Collection(c.Collection)
+	return c, nil
+}
+
+func (c *Client) Update(filter interface{}, update interface{}) error {
+	_, err := c.Collection.UpdateOne(c.Ctx, filter, update)
+	return err
+}
+
+func (c *Client) Walk(cb func(*mongo.Cursor) error) error {
 
 	findOptions := options.Find()
 	findOptions.SetNoCursorTimeout(true)
-	findOptions.SetLimit(20)
 
 	filter := bson.D{{}}
 
-	cur, err := collection.Find(ctx, filter, findOptions)
-	checkError(err)
-	defer cur.Close(ctx)
+	cur, err := c.Collection.Find(c.Ctx, filter, findOptions)
+	if err != nil {
+		return err
+	}
 
-	for cur.Next(ctx) {
+	defer cur.Close(c.Ctx)
+
+	for cur.Next(c.Ctx) {
 		err = cb(cur)
-		checkError(err)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = cur.Err()
-	checkError(err)
-}
-
-func checkError(err error) {
 	if err != nil {
-		panic(err)
+		return err
 	}
 }

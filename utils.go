@@ -1,7 +1,6 @@
 package go_mongo_client
 
 import (
-	"encoding/json"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -19,7 +18,7 @@ func CursorToMap(c *mongo.Cursor) (m map[string]interface{}, err error) {
 		return
 	}
 
-	err = json.Unmarshal(t, &m)
+	err = bson.UnmarshalExtJSON(t, true, &m)
 	if err != nil {
 		return
 	}
